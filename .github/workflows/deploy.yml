@@ -1,0 +1,21 @@
+name: Build-Deploy
+on:
+  push:
+    branches: [ main ]
+  schedule:
+    - cron: "0 3 * * *"    # ogni notte
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    - uses: actions/setup-node@v4
+      with: { node-version: 18 }
+    - run: npm ci
+    - run: node scripts/update-data.js || true    # ignora errore token
+    - run: node scripts/generator.js
+    - uses: peaceiris/actions-gh-pages@v4
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        publish_dir: ./dist
